@@ -29,37 +29,12 @@ addRoute("GET", /^\/\?user=\w+\&message=[^\&]+$/,/user=(\w+)&message=([^\&]+)/,f
 	res.name = data.name;
 	broadcast(data.message,data.user);
 	console.log(data.user+ " says: " + data.message);
-	response.end();
+	// res.end();
 });
 
 var server = http.createServer(function(request, response) {
 
-	// SET RESPONSE NAME TO IP ADDRESS AND PORT
-	// response.name = request.connection.remoteAddress + ":" + request.connection.remotePort;
-
 	response.writeHead(200, {"Content-Type": "text/html", "Access-control-allow-origin": "*"});
-
-	// IF URL REQUEST IS '/' OR JUST MAIN IP ADDRESS
-	// if(request.url.length <= 1){
-		// response.write("<h1>Welcome to Chat, " + response.name + "</h1><p>You asked for <code>" + request.url + "</code></p>");
-
-		// PUSH CLIENT TO CLIENTLIST
-		// clientList.push(response);
-		// console.log("Number of users in chat: " + clientList.length);
-		
-		// ENTER CHAT ROOM
-		// broadcast(response.name + " entered the chat room","Chat Server");
-		// console.log(response.name + " entered the room");
-
-	// } else if (request.url[1] === "?") {
-		// clientList.push(response);
-		// FILTER PATH AND QUERY (?) FROM REQUEST URL
-		// var message = (request.url).slice(2,request.url.length);
-
-		// BROADCAST MESSAGE
-		// broadcast(message,response.name);
-		// console.log(response.name + " says: " + message);
-	// }
 
 	// WHEN USER LEAVES CHAT
 	
@@ -74,7 +49,6 @@ var server = http.createServer(function(request, response) {
 			console.log("Number of users in chat: " + clientList.length);
 
 	});
-	
 
 	// response.end();
 });
