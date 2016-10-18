@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat Room</title>
+  <link href="lightbox.css" rel="stylesheet">
+  <script src="index.js"></script>
+</head>
+
+<body onload="load()">
+
+<h1>Chatroom</h1>
+
+<div class="lightbox" id="usernameRequest">
+
+  <figure>
+    <a href="#" class="closemsg"></a>
+    <figcaption>
+    <form onsubmit="myFunction()">
+      Enter a username:<br>
+      <input id="usr" type="text" name="firstname"><br><br>
+      <input type="submit" value="Submit">
+    </form> 
+  </figcaption>
+  </figure>
+
+</div>
+
+</body>
+
+<script type="text/javascript">
+  // function myFunction(){
+  //   var usr = document.getElementById("usr").value;
+  //   // alert(usr);
+  //   sendChatEntranceRequest(usr);
+  // }
+
+  // function load(){
+  //   window.location.href = "#usernameRequest";
+  // }
+  // $(document).ready(repeatedlySendRequest());
+</script>
+
+</html>
