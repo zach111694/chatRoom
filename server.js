@@ -1,62 +1,66 @@
 var http = require("http");
 
 var routes = [];
-
+var usernames = [];
 // LIST OF CLIENTS
 var clientList = [];
 
 
-//(message=)([^\&]+)
-
-addRoute("GET", /^\/$/,/^\/$/,function(req, res, data) {
-	clientList.push(res);
-
-});
+// addRoute("GET", /^\/$/,/^\/$/,function(req, res, data) {
+// 	clientList.push(res);
+// });
 
 addRoute("GET", /^\/\?user=\w+$/,/user=(\w+)/,function(req, res, data) {
 
-	res.write("<h1>Welcome to Chat, " + data.user + "</h1><p>You asked for <code>" + req.url + "</code></p>");
-	res.name = data.user;
-	clientList.push(res);
-	console.log("Number of users in chat: " + clientList.length);
-	broadcast(data.user + " entered the chat room","Chat Server");
-	console.log(data.user + " entered the room");
-
+	// data.welcome = "<h1>Welcome to Chat, " + data.user + "</h1>";
+	// data.message = "Chat Server: " + data.user + " entered the chat room";
+	if(usernames.indexOf(data.user) != -1){
+		clientList.push(res);
+		res.name = data.user;
+	} else {
+		usernames.push(data.user);
+		data.event = "enter";
+		dataStr = JSON.stringify(data);
+		res.write(dataStr);
+		broadcast(dataStr);
+		res.end();
+	}
 });
 
 addRoute("GET", /^\/\?user=\w+\&message=[^\&]+$/,/user=(\w+)&message=([^\&]+)/,function(req, res, data) {
-	clientList.push(res);
-	res.name = data.name;
+
+	res.name = data.user;
+
 	broadcast(data.message,data.user);
 	console.log(data.user+ " says: " + data.message);
-	// res.end();
 });
 
 var server = http.createServer(function(request, response) {
 
 	response.writeHead(200, {"Content-Type": "text/html", "Access-control-allow-origin": "*"});
-
-	// WHEN USER LEAVES CHAT
 	
 	resolve(request,response);
 
 	request.on("close",function(){
 
-			// NOTIFY EVERYONE WHO LEFT THE CHAT
-			clientList.splice(clientList.indexOf(response),1);
-			broadcast("Goodbye, " + response.name + ". See you next time!\n","Chat Server");
-			console.log(response.name + " left the room");
-			console.log("Number of users in chat: " + clientList.length);
+		var dataStr = JSON.stringify({
+			user: response.name,
+			event: "leave"
+		});
 
+		clientList.splice(clientList.indexOf(response),1);
+		broadcast(dataStr);
+		response.end();
 	});
-
-	// response.end();
 });
 
-function broadcast(message,client){
+function broadcast(dataObj){
 	clientList.forEach(function(participant) {
-		participant.write("<p><strong>" + client + "</strong> : " + message + "</p>");
+		participant.write(dataObj);
+		participant.end();
 	});
+
+	clientList = [];
 }
 
 function addRoute(method,url,data,handler){
@@ -89,11 +93,8 @@ function resolve(req,res){
 
 			routes[i].handler(req,res,queryData);
 		}
-
-		// routes[i].url.test(queryString);
 	}
+
 }
-
-
 
 server.listen(8000);
