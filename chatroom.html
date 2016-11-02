@@ -14,7 +14,8 @@
     <a href="#" class="closemsg"></a>
     <figcaption>
       Enter a username:<br>
-      <input id="usr" type="text" name="firstname"><br><br>
+      <input id="hiddenUsr" type="hidden" value="">
+      <input id="usr" type="text"><br><br>
       <input type="button" value="Submit" id="submitBTN">
   </figcaption>
   </figure>
@@ -25,8 +26,9 @@
 </div>
 
 <div style="position:fixed; bottom:0; padding-bottom:10px;">
-  <input size="100%" type="text" name="usermsg" id="userMsg"/>
-  <input type="button" name="submitmsg" id="msgBtn" value="Send"/>
+  <input id="hiddenUsr" type="hidden">
+  <input id="usrMsg" size="100%" type="text"/>
+  <input id="msgBtn" type="button" value="Send"/>
 </div>
 
 </body>

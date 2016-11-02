@@ -1,52 +1,86 @@
-// document.addEventListener("DOMContentLoaded", function(event){
-//     repeatedlySendRequest();
-//  });
-
+// TODO: FIX LIGHTBOX DISAPPEARING AFTER REFRESH PAGE
 function repeatedlySendRequest(username) {
 
-	var req = new XMLHttpRequest();   
+	var req = new XMLHttpRequest();
 	req.open("GET", "http://localhost:8000/?user=" + username, true);   
-	req.send(null); // send request w/no request body (used for POST requests)   
+	req.send(null);
 	req.addEventListener("load", function() {     
 		var data = JSON.parse(req.responseText);
+
+		// EVENT HANDLERS. TO CHANGE INTO EVENT EMITTERS
 		if(data.event == "enter"){
-			document.getElementById("msgTextArea").innerHTML += "<p><strong>Chat Server:</strong> " + data.user + " entered the chat room";
+			document.getElementById("msgTextArea").innerHTML += "<p><strong>Chat Server: <i>" + data.user + "</strong> entered the chat room" + "</i></p>";
 		} else if(data.event == "leave"){
-			document.getElementById("msgTextArea").innerHTML += "<p><strong>Chat Server: </strong> Goodbye, <strong>" + data.user + "</strong>. " + "See you next time!\n";
+			document.getElementById("msgTextArea").innerHTML += "<p><strong>Chat Server: <i>" + data.user + "</strong> " + "left the chat room" + "</i></p>";
+		} else if (data.event =="message"){
+			document.getElementById("msgTextArea").innerHTML += "<p><strong>" + data.user + ":</strong> " + data.message + "</p>";
 		}
 
-		repeatedlySendRequest(username); // repeat request once response has been processed   
+		repeatedlySendRequest(username);
 	}); 
 }
 
 function sendChatEntranceRequest(username) {
 	var req = new XMLHttpRequest();   
 	req.open("GET", "http://localhost:8000/?user=" + username, true);
-	
-	req.send(null); // send request w/no request body (used for POST requests)   
-
-	req.addEventListener("load", function(){ 
+	req.send(null);
+	req.addEventListener("load", function(){
 		repeatedlySendRequest(username);
-
 		var data = JSON.parse(req.responseText);
-		console.log(data);
 		document.getElementById("msgTextArea").innerHTML += "<h1>Welcome to Chat, " + data.user + "</h1>";
 	}); 
 } 
 
-var btn = document.getElementById("submitBTN");
+function sendMessage(username,message){
+	var req = new XMLHttpRequest();
+	req.open("GET","http://localhost:8000/?user="+username+"&message="+message,true);
+	req.send(null);
+}
 
-btn.addEventListener("click",function(event){
+// AUTO-SELECT USERNAME INPUT FIELD
+window.onload = function(){
+	document.getElementById("usr").focus();
+}
+
+// SET USERNAME ON BUTTON CLICK AT LIGHTBOX
+document.getElementById("submitBTN").addEventListener("click",function(){
 	var usr = document.getElementById("usr").value;
+	// SET HIDDEN INPUT VALUE TO USERNAME
+	var hiddenUser = document.getElementById("hiddenUsr").value = usr;
     window.location.href = "#usernameRequest";
+    // AUTO-SELECT MESSAGE INPUT FIELD
+    document.getElementById("usrMsg").focus();
     sendChatEntranceRequest(usr);
 });
 
-// document.getElementById("msgBtn").addEventListener("click", function() {
-// 	var msg = document.getElementById("messageField").value;
-// 	var username = document.getElementById("hiddenField").value; // other options?
-// 	sendMessage(username, message); // implement like sendChatEntranceRequest,refactoring?
-// });  
+// SET USERNAME ON ENTER KEY TO TRIGGER BUTTON CLICK AT LIGHTBOX
+document.getElementById("usr").addEventListener("keyup",function(event) {
+    event.preventDefault();
+    if (event.keyCode == 13) {
+        document.getElementById("submitBTN").click();
+    }
+});
+
+// SEND MESSAGE ON BUTTON CLICK
+document.getElementById("msgBtn").addEventListener("click", function() {
+	var msg = document.getElementById("usrMsg").value;
+	// SET USERNAME FROM HIDDEN INPUT VALUE
+	var username = document.getElementById("hiddenUsr").value;
+
+	sendMessage(username, msg);
+
+	// CLEAR TEXT INPUT
+	document.getElementById("usrMsg").value = "";
+});  
+
+// SEND MESSAGE ON ENTER KEY TO TRIGGER BUTTON CLICK
+document.getElementById("usrMsg").addEventListener("keyup",function(event) {
+    event.preventDefault();
+    if (event.keyCode == 13) {
+        document.getElementById("msgBtn").click();
+    }
+});
+
 
 
 
