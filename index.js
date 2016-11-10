@@ -9,12 +9,48 @@ function repeatedlySendRequest(username) {
 
 		// EVENT HANDLERS. TO CHANGE INTO EVENT EMITTERS
 		if(data.event == "enter"){
-			document.getElementById("msgTextArea").innerHTML += "<p><strong>Chat Server: <i>" + data.user + "</strong> entered the chat room" + "</i></p>";
+			document.getElementById("messages").innerHTML += "<p><strong>Chat Server: <i>" + data.user + "</strong> entered the chat room" + "</i></p>";
 		} else if(data.event == "leave"){
-			document.getElementById("msgTextArea").innerHTML += "<p><strong>Chat Server: <i>" + data.user + "</strong> " + "left the chat room" + "</i></p>";
+			document.getElementById("messages").innerHTML += "<p><strong>Chat Server: <i>" + data.user + "</strong> " + "left the chat room" + "</i></p>";
 		} else if (data.event =="message"){
-			document.getElementById("msgTextArea").innerHTML += "<p><strong>" + data.user + ":</strong> " + data.message + "</p>";
-		}
+			// document.getElementById("msgTextArea").innerHTML += "<p><strong>" + data.user + ":</strong> " + data.message + "</p>";
+    
+  var msgTemplate = document.getElementById("msgTemplate");
+  var msgDisplay  = document.getElementById("messages");
+
+  var data = {
+    username: data.user,
+    message: ": " + data.message
+  };
+
+  function instantiateNode(node){
+    var clonedNode = node.cloneNode(false);
+    
+    if(clonedNode.nodeType == document.ELEMENT_NODE){
+      for(var i = 0; i < node.childNodes.length;i++){
+        clonedNode.appendChild(instantiateNode(node.childNodes[i]));
+      }
+    }
+
+    if(clonedNode.nodeType == document.TEXT_NODE){
+      var matches = clonedNode.nodeValue.match(/{{.+}}/g);
+
+      if(matches != null){
+        for(var j = 0; j < matches.length;j++){
+          var match = (/{{(.+)}}/g).exec(clonedNode.nodeValue)[1];
+
+          clonedNode.nodeValue = clonedNode.nodeValue.replace(matches[j],data[match]);
+        }
+      } 
+    }
+    return clonedNode;
+  }
+  
+  var clonedTemplate = instantiateNode(msgTemplate);
+  clonedTemplate.style.display = "inline";
+  
+  msgDisplay.appendChild(clonedTemplate);
+	}
 
 		repeatedlySendRequest(username);
 	}); 
@@ -27,7 +63,7 @@ function sendChatEntranceRequest(username) {
 	req.addEventListener("load", function(){
 		repeatedlySendRequest(username);
 		var data = JSON.parse(req.responseText);
-		document.getElementById("msgTextArea").innerHTML += "<h1>Welcome to Chat, " + data.user + "</h1>";
+		document.getElementById("messages").innerHTML += "<h1>Welcome to Chat, " + data.user + "</h1>";
 	}); 
 } 
 
@@ -81,6 +117,48 @@ document.getElementById("usrMsg").addEventListener("keyup",function(event) {
     }
 });
 
+// MESSAGE TEMPLATE
+// document.getElementById("msgBtn").addEventListener("click", function() {
+
+//   var msgField    = document.getElementById("usrMsg");
+//   var msgTemplate = document.getElementById("msgTemplate");
+//   var msgDisplay  = document.getElementById("messages");
+//   var usr = document.getElementById("hiddenUsr");
+
+//   var data = {
+//     username: usr.value,
+//     message: ": " + msgField.value
+//   };
+
+//   function instantiateNode(node){
+//   	var clonedNode = node.cloneNode(false);
+    
+//   	if(clonedNode.nodeType == document.ELEMENT_NODE){
+//   		for(var i = 0; i < node.childNodes.length;i++){
+//   			clonedNode.appendChild(instantiateNode(node.childNodes[i]));
+//   		}
+//   	}
+
+//     if(clonedNode.nodeType == document.TEXT_NODE){
+//       var matches = clonedNode.nodeValue.match(/{{.+}}/g);
+
+//       if(matches != null){
+//         for(var j = 0; j < matches.length;j++){
+//           var match = (/{{(.+)}}/g).exec(clonedNode.nodeValue)[1];
+
+//           clonedNode.nodeValue = clonedNode.nodeValue.replace(matches[j],data[match]);
+//         }
+//       } 
+//     }
+//     return clonedNode;
+//   }
+  
+//   var clonedTemplate = instantiateNode(msgTemplate);
+//   clonedTemplate.style.display = "inline";
+  
+//   msgDisplay.appendChild(clonedTemplate);
+//   msgField.value = ""; 
+// });
 
 
 

@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <title>Chat Room</title>
   <link href="lightbox.css" rel="stylesheet">
-  
+  <link href="style.css" rel="stylesheet">
 </head>
 
 <body>
@@ -21,9 +21,16 @@
   </figure>
 </div>
 
-
-<div id="msgTextArea">
+<div id="msgTemplate" style="display:none;">
+  <p>
+    <span class = "user">{{username}}</span>{{message}}
+  </p>
 </div>
+
+<div id="messages"></div>
+
+<!-- <div id="msgTextArea">
+</div> -->
 
 <div style="position:fixed; bottom:0; padding-bottom:10px;">
   <input id="hiddenUsr" type="hidden">

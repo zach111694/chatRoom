@@ -1,5 +1,5 @@
-document.getElementById("msgSubmit").addEventListener("click", function() {
-  var msgField    = document.getElementById("msg");
+document.getElementById("msgBtn").addEventListener("click", function() {
+  var msgField    = document.getElementById("usrMsg");
   var msgTemplate = document.getElementById("msgTemplate");
   var msgDisplay  = document.getElementById("messages");
   
@@ -24,3 +24,4 @@ document.getElementById("msgSubmit").addEventListener("click", function() {
   
   msgField.value = "";
 });
+
