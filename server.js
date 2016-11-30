@@ -23,7 +23,7 @@ addRoute("GET", /^\/\?user=\w+$/,/user=(\w+)/,function(req, res, data) {
 		broadcast(dataStr);
 		res.end();
 	}
-	
+
 });
 
 // MESSAGE ROUTE

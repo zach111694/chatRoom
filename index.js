@@ -1,20 +1,38 @@
-// TODO: FIX LIGHTBOX DISAPPEARING AFTER REFRESH PAGE
-function repeatedlySendRequest(username) {
+// EVENT EMITTER
 
-	var req = new XMLHttpRequest();
-	req.open("GET", "http://localhost:8000/?user=" + username, true);   
-	req.send(null);
-	req.addEventListener("load", function() {     
-		var data = JSON.parse(req.responseText);
+function EventEmitter(){
+  this.eventListeners = {};
+}
 
-		// EVENT HANDLERS. TO CHANGE INTO EVENT EMITTERS
-		if(data.event == "enter"){
-			document.getElementById("messages").innerHTML += "<p><strong>Chat Server: <i>" + data.user + "</strong> entered the chat room" + "</i></p>";
-		} else if(data.event == "leave"){
-			document.getElementById("messages").innerHTML += "<p><strong>Chat Server: <i>" + data.user + "</strong> " + "left the chat room" + "</i></p>";
-		} else if (data.event =="message"){
-			// document.getElementById("msgTextArea").innerHTML += "<p><strong>" + data.user + ":</strong> " + data.message + "</p>";
-    
+EventEmitter.prototype.on = function(eventStr,handler){
+  if(eventStr in this.eventListeners){
+    this.eventListeners[eventStr].push(handler);
+  } else {
+    this.eventListeners[eventStr] = [handler];
+  }
+};
+
+EventEmitter.prototype.emit = function(eventStr){
+  var args = Array.prototype.slice.call(arguments,1);
+
+  if(eventStr in this.eventListeners){
+    this.eventListeners[eventStr].forEach(function(func){
+      func.apply(null,args);
+    });
+  }
+};
+
+var chatServer = new EventEmitter();
+
+chatServer.on("enter",function(data){
+  document.getElementById("messages").innerHTML += "<p><strong>Chat Server: <i>" + data.user + "</strong> entered the chat room" + "</i></p>";
+});
+
+chatServer.on("leave",function(data){
+  document.getElementById("messages").innerHTML += "<p><strong>Chat Server: <i>" + data.user + "</strong> " + "left the chat room" + "</i></p>";  
+});
+
+chatServer.on("message",function(data){
   var msgTemplate = document.getElementById("msgTemplate");
   var msgDisplay  = document.getElementById("messages");
 
@@ -23,36 +41,22 @@ function repeatedlySendRequest(username) {
     message: ": " + data.message
   };
 
-  function instantiateNode(node){
-    var clonedNode = node.cloneNode(false);
-    
-    if(clonedNode.nodeType == document.ELEMENT_NODE){
-      for(var i = 0; i < node.childNodes.length;i++){
-        clonedNode.appendChild(instantiateNode(node.childNodes[i]));
-      }
-    }
-
-    if(clonedNode.nodeType == document.TEXT_NODE){
-      var matches = clonedNode.nodeValue.match(/{{.+}}/g);
-
-      if(matches != null){
-        for(var j = 0; j < matches.length;j++){
-          var match = (/{{(.+)}}/g).exec(clonedNode.nodeValue)[1];
-
-          clonedNode.nodeValue = clonedNode.nodeValue.replace(matches[j],data[match]);
-        }
-      } 
-    }
-    return clonedNode;
-  }
   
-  var clonedTemplate = instantiateNode(msgTemplate);
+
+  var clonedTemplate = instantiateNode(msgTemplate,data);
   clonedTemplate.style.display = "inline";
-  
   msgDisplay.appendChild(clonedTemplate);
-	}
+  window.scrollTo(0,document.body.scrollHeight);
+});
 
-		repeatedlySendRequest(username);
+function repeatedlySendRequest(username) {
+	var req = new XMLHttpRequest();
+	req.open("GET", "http://localhost:8000/?user=" + username, true);   
+	req.send(null);
+	req.addEventListener("load", function() {     
+    var data = JSON.parse(req.responseText);
+    chatServer.emit(data.event,data);
+    repeatedlySendRequest(username);
 	}); 
 }
 
@@ -72,6 +76,29 @@ function sendMessage(username,message){
 	req.open("GET","http://localhost:8000/?user="+username+"&message="+message,true);
 	req.send(null);
 }
+
+function instantiateNode(node,data){
+    var clonedNode = node.cloneNode(false);
+    
+    if(clonedNode.nodeType == document.ELEMENT_NODE){
+      for(var i = 0; i < node.childNodes.length;i++){
+        clonedNode.appendChild(instantiateNode(node.childNodes[i],data));
+      }
+    }
+
+    if(clonedNode.nodeType == document.TEXT_NODE){
+      var matches = clonedNode.nodeValue.match(/{{.+}}/g);
+
+      if(matches != null){
+        for(var j = 0; j < matches.length;j++){
+          var match = (/{{(.+)}}/g).exec(clonedNode.nodeValue)[1];
+
+          clonedNode.nodeValue = clonedNode.nodeValue.replace(matches[j],data[match]);
+        }
+      } 
+    }
+    return clonedNode;
+  }
 
 // AUTO-SELECT USERNAME INPUT FIELD
 window.onload = function(){
@@ -116,6 +143,8 @@ document.getElementById("usrMsg").addEventListener("keyup",function(event) {
         document.getElementById("msgBtn").click();
     }
 });
+
+
 
 // MESSAGE TEMPLATE
 // document.getElementById("msgBtn").addEventListener("click", function() {
